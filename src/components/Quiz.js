@@ -7,14 +7,15 @@ const Quiz = () => {
   const [feedback, setFeedback] = useState("");
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [quizStarted, setQuizStarted] = useState(false); // Tracks if the quiz has started
 
   // Play number audio
   const playNumberAudio = (num) => {
     const audio = new Audio(require(`../audio/${num}.mp3`));
-    audio.play();
+    audio.play().catch((err) => console.error("Audio play error:", err));
   };
 
-  // Generate a random number
+  // Generate a random number for the quiz
   const generateNumber = () => {
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     setNumber(randomNumber);
@@ -23,10 +24,12 @@ const Quiz = () => {
     playNumberAudio(randomNumber);
   };
 
-  // Handle user input
-  const handleInputChange = (e) => setUserInput(e.target.value);
+  // Handle user input change
+  const handleInputChange = (e) => {
+    setUserInput(e.target.value);
+  };
 
-  // Check the user's answer
+  // Submit the user's answer
   const handleSubmit = () => {
     if (parseInt(userInput) === number) {
       setFeedback("Correct!");
@@ -40,41 +43,48 @@ const Quiz = () => {
     setUserInput("");
   };
 
-  // Replay the audio
+  // Replay the current audio
   const handleReplay = () => playNumberAudio(number);
 
-  // Countdown timer
+  // Countdown timer logic
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && quizStarted) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && feedback === "") {
+    } else if (timeLeft === 0 && feedback === "" && quizStarted) {
       setFeedback("Time's up!");
     }
-  }, [timeLeft, feedback]);
+  }, [timeLeft, feedback, quizStarted]);
 
-  // Initialize the quiz
-  useEffect(() => {
+  // Start the quiz
+  const startQuiz = () => {
+    setQuizStarted(true);
     generateNumber();
-  }, []);
+  };
 
   return (
     <div>
       <h2>French Numbers Quiz</h2>
-      <p>Guess the number after listening to the audio:</p>
-      <input
-        type="number"
-        value={userInput}
-        onChange={handleInputChange}
-        disabled={timeLeft === 0}
-        placeholder="Enter your guess"
-      />
-      <button onClick={handleSubmit}>Submit</button>
-      <button onClick={handleReplay}>Replay</button>
-      <p style={{ color: timeLeft === 0 ? "red" : "black" }}>Time left: {timeLeft}s</p>
-      <p>{feedback}</p>
-      <p>Current Streak: {streak}</p>
-      <p>Best Streak: {bestStreak}</p>
+      {!quizStarted ? (
+        <button onClick={startQuiz}>Start Quiz</button>
+      ) : (
+        <>
+          <p>Guess the number after listening to the audio:</p>
+          <input
+            type="number"
+            value={userInput}
+            onChange={handleInputChange}
+            disabled={timeLeft === 0}
+            placeholder="Enter your guess"
+          />
+          <button onClick={handleSubmit}>Submit</button>
+          <button onClick={handleReplay}>Replay</button>
+          <p style={{ color: timeLeft === 0 ? "red" : "black" }}>Time left: {timeLeft}s</p>
+          <p>{feedback}</p>
+          <p>Current Streak: {streak}</p>
+          <p>Best Streak: {bestStreak}</p>
+        </>
+      )}
     </div>
   );
 };
