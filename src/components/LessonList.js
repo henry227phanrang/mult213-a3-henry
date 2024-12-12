@@ -1,35 +1,44 @@
 import React, { useState } from "react";
-import { fetchWordData } from "../api/dictionary";
+import { fetchWordData } from "../api/dictionary"; // Import the function from dictionary.js
 
 const LessonList = () => {
-  const [word, setWord] = useState("");
-  const [wordData, setWordData] = useState(null);
+  const [word, setWord] = useState(""); // User input word
+  const [translation, setTranslation] = useState(""); // Translation result
+  const [error, setError] = useState(""); // Error message, if any
 
   const handleSearch = async () => {
+    if (!word.trim()) {
+      setError("Please enter a word to translate.");
+      return;
+    }
     try {
-      const data = await fetchWordData(word);
-      setWordData(data[0]);
-    } catch {
-      setWordData(null);
+      setError(""); // Clear any previous errors
+      const result = await fetchWordData(word); // Call the API
+      setTranslation(result); // Update translation
+    } catch (err) {
+      setError("Error fetching translation. Please try again.");
     }
   };
 
   return (
     <div>
-      <h2>Search for a Word</h2>
-      <input
-        type="text"
-        value={word}
-        onChange={(e) => setWord(e.target.value)}
-        placeholder="Enter a word"
-      />
-      <button onClick={handleSearch}>Search</button>
+      <h2>French-English Dictionary</h2>
+      <div>
+        <input
+          type="text"
+          value={word}
+          onChange={(e) => setWord(e.target.value)}
+          placeholder="Enter a French word"
+        />
+        <button onClick={handleSearch}>Translate</button>
+      </div>
 
-      {wordData && (
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {translation && (
         <div>
-          <h3>{wordData.word}</h3>
-          <p>Definition: {wordData.meanings[0]?.definitions[0]?.definition}</p>
-          <p>Example: {wordData.meanings[0]?.definitions[0]?.example}</p>
+          <h3>Translation:</h3>
+          <p>{translation}</p>
         </div>
       )}
     </div>
