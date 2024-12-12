@@ -1,6 +1,5 @@
 import React from "react";
 import LessonList from "./components/LessonList";
-import Progress from "./components/Progress";
 import Quiz from "./components/Quiz";
 import "./styles/App.css";
 
@@ -12,7 +11,6 @@ function App() {
       </header>
       <LessonList />
       <Quiz />
-      <Progress />
     </div>
   );
 }
