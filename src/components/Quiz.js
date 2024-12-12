@@ -1,32 +1,49 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 const Quiz = () => {
-  const [number, setNumber] = useState("");
+  const [number, setNumber] = useState(1);
   const [userInput, setUserInput] = useState("");
   const [timeLeft, setTimeLeft] = useState(5);
   const [feedback, setFeedback] = useState("");
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
 
-  const audioRef = useRef(null);
+  // Play number audio
+  const playNumberAudio = (num) => {
+    const audio = new Audio(require(`../audio/${num}.mp3`));
+    audio.play();
+  };
 
-  // Generate a random number and play audio
+  // Generate a random number
   const generateNumber = () => {
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     setNumber(randomNumber);
     setFeedback("");
-    playNumberAudio(randomNumber);
     setTimeLeft(5);
+    playNumberAudio(randomNumber);
   };
 
-  // Play number audio
-  const playNumberAudio = (num) => {
-    const audio = new Audio(`https://audio-file-source.com/fr/${num}.mp3`);
-    audioRef.current = audio;
-    audio.play();
+  // Handle user input
+  const handleInputChange = (e) => setUserInput(e.target.value);
+
+  // Check the user's answer
+  const handleSubmit = () => {
+    if (parseInt(userInput) === number) {
+      setFeedback("Correct!");
+      setStreak(streak + 1);
+      setBestStreak(Math.max(bestStreak, streak + 1));
+      generateNumber();
+    } else {
+      setFeedback(`Wrong! The correct answer was ${number}`);
+      setStreak(0);
+    }
+    setUserInput("");
   };
 
-  // Handle timer countdown
+  // Replay the audio
+  const handleReplay = () => playNumberAudio(number);
+
+  // Countdown timer
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -36,35 +53,7 @@ const Quiz = () => {
     }
   }, [timeLeft, feedback]);
 
-  // Handle user input
-  const handleChange = (e) => setUserInput(e.target.value);
-
-  // Check user answer
-  const checkAnswer = () => {
-    if (parseInt(userInput) === number) {
-      setFeedback("Correct!");
-      setStreak(streak + 1);
-      setBestStreak(Math.max(bestStreak, streak + 1));
-      generateNumber();
-    } else {
-      setFeedback(`Wrong! The correct answer was ${number}.`);
-      setStreak(0);
-    }
-    setUserInput("");
-  };
-
-  // Handle keyboard shortcuts
-  const handleKeyDown = (e) => {
-    if (e.key === "r") playNumberAudio(number); // Replay
-    if (e.key === "q") setFeedback(`The correct answer is ${number}`); // Reveal answer
-  };
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [number]);
-
-  // Start the quiz on mount
+  // Initialize the quiz
   useEffect(() => {
     generateNumber();
   }, []);
@@ -72,20 +61,17 @@ const Quiz = () => {
   return (
     <div>
       <h2>French Numbers Quiz</h2>
-      <p>Listen to the number and type your guess:</p>
-      <div>
-        <input
-          type="number"
-          value={userInput}
-          onChange={handleChange}
-          disabled={timeLeft === 0}
-          placeholder="Enter your guess"
-        />
-        <button onClick={checkAnswer}>Submit</button>
-      </div>
-      <p style={{ color: timeLeft === 0 ? "red" : "black" }}>
-        Time left: {timeLeft}s
-      </p>
+      <p>Guess the number after listening to the audio:</p>
+      <input
+        type="number"
+        value={userInput}
+        onChange={handleInputChange}
+        disabled={timeLeft === 0}
+        placeholder="Enter your guess"
+      />
+      <button onClick={handleSubmit}>Submit</button>
+      <button onClick={handleReplay}>Replay</button>
+      <p style={{ color: timeLeft === 0 ? "red" : "black" }}>Time left: {timeLeft}s</p>
       <p>{feedback}</p>
       <p>Current Streak: {streak}</p>
       <p>Best Streak: {bestStreak}</p>
