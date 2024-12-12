@@ -2,12 +2,6 @@
     text-align: center;
   }
   
-  .App-header {
-    background-color: #282c34;
-    padding: 20px;
-    color: white;
-  }
-  
   input {
     margin: 10px;
     padding: 5px;
@@ -15,8 +9,17 @@
   }
   
   button {
+    margin: 5px;
     padding: 5px 10px;
     font-size: 16px;
     cursor: pointer;
+  }
+  
+  p {
+    font-size: 18px;
+  }
+  
+  p.red {
+    color: red;
   }
   
